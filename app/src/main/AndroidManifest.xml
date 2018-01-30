@@ -4,6 +4,7 @@
 
 
     <uses-feature android:name="android.hardware.microphone" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <application
         android:allowBackup="true"

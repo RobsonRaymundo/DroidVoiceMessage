@@ -1,6 +1,10 @@
 package com.droid.ray.droidvoicemessage.service;
 
+import android.app.NotificationManager;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +13,7 @@ import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.droid.ray.droidvoicemessage.activity.MainActivity;
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
@@ -21,6 +26,16 @@ public class DroidPhoneService extends Service {
     private static final String TAG = "DroidVoiceMessage";
     private DroidPhoneReceiver phoneReceiver;
 
+    //bluetouch
+    private static final int NOTE_ID = 1000;
+
+    public static final String ACTION_STARTVOICE = "com.example.BluetoothAudioProxy.action.STARTVOICE";
+    public static final String ACTION_STOPVOICE = "com.example.BluetoothAudioProxy.action.STOPVOICE";
+
+    BluetoothAdapter mBluetoothAdapter;
+    BluetoothHeadset mBluetoothHeadset;
+
+
 
     @Nullable
     @Override
@@ -32,6 +47,15 @@ public class DroidPhoneService extends Service {
     public void onCreate() {
         super.onCreate();
         phoneReceiver = new DroidPhoneReceiver();
+
+        //bluetouch
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        // Establish connection to the proxy.
+        mBluetoothAdapter.getProfileProxy(this, mProfileListener, BluetoothProfile.HEADSET);
+        //Monitor profile events
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
+        registerReceiver(mProfileReceiver, filter);
     }
 
     @Override
@@ -43,27 +67,91 @@ public class DroidPhoneService extends Service {
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(phoneReceiver);
         super.onDestroy();
+        unregisterReceiver(phoneReceiver);
+
+        //bluetouch
+        mBluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mBluetoothHeadset);
+        unregisterReceiver(mProfileReceiver);
     }
 
     private class DroidPhoneReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", -1);
+                String message= "";
                 switch (state) {
                     case 0:
-                        Log.d(TAG, "Headset is unplugged");
-
+                        message = "Fone de ouvido desconectado";
+                        DroidCommon.ShowListener(context);
                         break;
                     case 1:
-                        Log.d(TAG, "Headset is plugged");
+                        message = "Fone de ouvido conectado";
                         DroidCommon.ShowListener(context);
                         break;
                     default:
-                        Log.d(TAG, "I have no idea what the headset state is");
+                        Log.d(TAG, "Houve algum problema ao obter o estado do fone de ouvido");
                 }
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+
+    //bluetouch
+    private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if (profile == BluetoothProfile.HEADSET) {
+                Log.d(TAG, "Connecting HeadsetService...");
+                mBluetoothHeadset = (BluetoothHeadset) proxy;
+            }
+        }
+        public void onServiceDisconnected(int profile) {
+            if (profile == BluetoothProfile.HEADSET) {
+                Log.d(TAG, "Unexpected Disconnect of HeadsetService...");
+                mBluetoothHeadset = null;
+            }
+        }
+    };
+
+    private BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+                Log.d(TAG, "ACTION_CONNECTION_STATE_CHANGED");
+                notifyConnectState(context, intent);
+            }
+
+        }
+    };
+
+
+    private void notifyConnectState(Context context, Intent intent) {
+        final int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, -1);
+        String message = "";
+        switch (state) {
+            case BluetoothHeadset.STATE_CONNECTED:
+                message = "Dispositivo bluetouch conectado";
+                DroidCommon.ShowListener(context);
+                break;
+            case BluetoothHeadset.STATE_CONNECTING:
+                message = "Conectando o dispositivo bluetouch";
+                break;
+            case BluetoothHeadset.STATE_DISCONNECTING:
+                message = "Disconectano o dispositivo bluetouch";
+                break;
+            case BluetoothHeadset.STATE_DISCONNECTED:
+                DroidCommon.ShowListener(context);
+                message = "Dispositivo bluetouch desconectado";
+                break;
+            default:
+                message = "Connect Unknown";
+                break;
+        }
+
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        //   buildNotification(message);
     }
 }
