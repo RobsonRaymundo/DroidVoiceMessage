@@ -35,7 +35,7 @@ public class DroidNotification extends DroidBaseNotification {
             try {
                 context.stopService(intentTTS);
                 DroidCommon.TimeSleep(1000);
-                intentTTS.putExtra("tit", "Mensagem de " + tit);
+                    intentTTS.putExtra("tit", "Mensagem de " + tit);
                 intentTTS.putExtra("msg", msg);
                 context.startService(intentTTS);
             } catch (Exception ex) {
@@ -52,7 +52,9 @@ public class DroidNotification extends DroidBaseNotification {
         String pack = mStatusBarNotification.getPackageName();// Package Name
         msg = "";
         tit = "";
-        if (pack.contains("com.whatsapp")) {
+        if (pack.contains("com.whatsapp") ||
+                pack.contains("com.android.mms") ||
+                pack.contains("com.facebook.orca")) {
             Bundle extras = mStatusBarNotification.getNotification().extras;
             tit = extras.getCharSequence(Notification.EXTRA_TITLE); // Title
             CharSequence desc = extras.getCharSequence(Notification.EXTRA_TEXT); // / Description
@@ -66,6 +68,12 @@ public class DroidNotification extends DroidBaseNotification {
             }
             if (msg.isEmpty()) {
                 msg = desc.toString();
+            }
+
+            if (msg.equals("procurando novas mensagens"))
+            {
+                tit = "";
+                msg = "";
             }
 
         }
