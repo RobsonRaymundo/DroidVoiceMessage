@@ -12,6 +12,7 @@ import com.droid.ray.droidvoicemessage.service.DroidPhoneService;
  */
 
 public class DroidCommon {
+    public static final String TAG = "VoiceMessage";
 
     public static void ShowListener(Context context)
     {
@@ -32,20 +33,5 @@ public class DroidCommon {
         } catch (Exception ex) {
         }
     }
-
-    public static void Vibrar(Context context, int valor) {
-        try {
-            TimeSleep(100);
-            Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(valor);
-            TimeSleep(100);
-        } catch (Exception ex) {
-            Log.d("DroidBattery", "Vibrar: " + ex.getMessage());
-        }
-    }
-
-
-
-
 
 }

@@ -19,7 +19,6 @@ import java.util.Locale;
 public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     private TextToSpeech tts;
     private Context context;
-    private String tit;
     private String msg;
 
 
@@ -32,9 +31,6 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
 
     @Override
     public void onInit(int i) {
-
-        Fala(tit);
-        DroidCommon.TimeSleep(1000);
         Fala(msg);
 
     }
@@ -42,7 +38,6 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        tit = intent.getStringExtra("tit");
         msg = intent.getStringExtra("msg");
 
     }
@@ -51,8 +46,6 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     public void onCreate() {
         super.onCreate();
         context = getBaseContext();
-
-
         tts = new TextToSpeech(context, this);
         tts.setLanguage(Locale.getDefault());
     }
