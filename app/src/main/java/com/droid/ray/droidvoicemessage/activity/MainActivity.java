@@ -20,20 +20,10 @@ public class MainActivity extends AppCompatActivity {
         context = getBaseContext();
 
         DroidCommon.ShowListener(context);
-        DroidCommon.StartPhoneService(context);
-        finish();
+      //  DroidCommon.StartPhoneService(context);
+     //   finish();
     }
 
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-    }
-
-    @Override public void onPause() {
-
-        super.onPause();
-    }
 
 
 }

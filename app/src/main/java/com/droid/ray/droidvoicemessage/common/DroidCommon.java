@@ -13,6 +13,8 @@ import com.droid.ray.droidvoicemessage.service.DroidPhoneService;
 
 public class DroidCommon {
     public static final String TAG = "VoiceMessage";
+    public static boolean emServico = false;
+    public static String msgs = "";
 
     public static void ShowListener(Context context)
     {

@@ -15,6 +15,7 @@ import com.droid.ray.droidvoicemessage.common.DroidCommon;
 import com.droid.ray.droidvoicemessage.tts.DroidTTS;
 
 import static com.droid.ray.droidvoicemessage.common.DroidCommon.TAG;
+import static com.droid.ray.droidvoicemessage.common.DroidCommon.msgs;
 
 
 /**
@@ -22,69 +23,116 @@ import static com.droid.ray.droidvoicemessage.common.DroidCommon.TAG;
  */
 
 public class DroidNotification extends DroidBaseNotification {
-    private String msg = "";
+    private String msg;
+
+
+    private void EnviaMsg(Context context, String msg, String msgs) {
+        try {
+            Intent intentTTS = new Intent(context, DroidTTS.class);
+            DroidCommon.emServico = true;
+            AguardandoTerminoServico(context, intentTTS);
+            //  DroidCommon.TimeSleep(1000);
+            intentTTS.putExtra("msg",  msgs + " " + msg);
+            DroidCommon.msgs = "";
+            Log.d(TAG, "onNotificationPosted - startService");
+            context.startService(intentTTS);
+        } catch (Exception ex) {
+            Log.d(TAG, "onNotificationPosted " + ex.getMessage());
+        }
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        Context context = getBaseContext();
-        getNotificationKitKat(sbn);
+        final Context context = getBaseContext();
+        Log.d(TAG, "onNotificationPosted inicial");
+        msg = getNotificationKitKat(sbn);
 
+        Log.d(TAG, "msg: " + msg);
+        Log.d(TAG, "msgs:" + DroidCommon.msgs);
+        Log.d(TAG, "--------------------------------------------");
 
         if (!msg.toString().isEmpty()) {
-            Intent intentTTS = new Intent(context, DroidTTS.class);
-            try {
-                context.stopService(intentTTS);
-                DroidCommon.TimeSleep(1000);
-                intentTTS.putExtra("msg", msg);
-                context.startService(intentTTS);
-            } catch (Exception ex) {
-                Log.d(TAG, "onNotificationPosted ");
+
+            if (DroidCommon.emServico) {
+                DroidCommon.msgs =  DroidCommon.msgs + " " + msg;
+            } else {
+                EnviaMsg(context,  msg, DroidCommon.msgs);
+
             }
         }
+    }
+
+    private void AguardandoTerminoServico(final Context context, final Intent intentTTS) {
+        Log.d(TAG, "AguardandoTerminoServico");
+
+        new Thread(new Runnable() {
+            public void run() {
+                while (DroidCommon.emServico) {
+                    Log.d(TAG, "AguardandoTerminoServico");
+                    DroidCommon.TimeSleep(500);
+                }
+                try {
+                    Log.d(TAG, "ParandoServico");
+                    stopService(intentTTS);
+                } catch (Exception ex) {
+                    Log.d(TAG, "stopService: " + ex.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    private boolean FilterTitleNotification(String msg) {
+        String titleMsg = msg.toLowerCase();
+        return !titleMsg.toLowerCase().equals("ícones de bate-papo ativos") &&
+                !titleMsg.toLowerCase().contains("mensagens):") &&
+                !titleMsg.toLowerCase().equals("mensagens está em execução");
 
     }
 
+    private String SetNotif(String notif) {
+        String notifMsg = notif.toLowerCase();
+        if (notifMsg.equals("procurando novas mensagens") || notifMsg.equals("mensagens está em execução")) {
+            notif = "";
+        }
+
+        return notif;
+    }
+
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void getNotificationKitKat(StatusBarNotification mStatusBarNotification) {
+    private String getNotificationKitKat(StatusBarNotification mStatusBarNotification) {
         String tit;
-        msg = "";
+        String notif = "";
         String pack = mStatusBarNotification.getPackageName();// Package Name
         if (pack.contains("com.whatsapp") ||
                 pack.contains("com.android.mms") ||
                 pack.contains("com.facebook.orca")) {
             Bundle extras = mStatusBarNotification.getNotification().extras;
             tit = (String) extras.getCharSequence(Notification.EXTRA_TITLE); // Title
-            if (!tit.toLowerCase().equals("ícones de bate-papo ativos"))
-            {
+
+            if (FilterTitleNotification(tit)) {
                 CharSequence desc = extras.getCharSequence(Notification.EXTRA_TEXT); // / Description
 
                 try {
                     Bundle bigExtras = mStatusBarNotification.getNotification().extras;
                     CharSequence[] descArray = bigExtras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
-                    msg = descArray[descArray.length - 1].toString();
+                    notif = descArray[descArray.length - 1].toString();
 
                 } catch (Exception ex) {
-
-                }
-
-                if (msg.isEmpty()) {
-                    msg = desc.toString();
+                    notif = desc.toString();
                 }
 
                 if (!tit.toLowerCase().equals("whatsapp")) {
-                    msg = tit + " " + msg;
+                    notif = tit + " " + notif;
                 }
 
-                if (msg.toLowerCase().equals("procurando novas mensagens")) {
-                    msg = "";
-                }
+                notif = SetNotif(notif);
 
                 Log.d(TAG, "tit: " + tit);
-                Log.d(TAG, "msg: " + msg);
+                Log.d(TAG, notif + notif);
                 Log.d(TAG, "--------------------------------------------");
             }
-
-
         }
+        return notif;
     }
 
 }
