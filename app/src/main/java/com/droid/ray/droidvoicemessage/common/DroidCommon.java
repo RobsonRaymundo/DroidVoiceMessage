@@ -40,8 +40,10 @@ public class DroidCommon {
 
     public static void AdicionaMsg(String msg) {
         try {
-            Mensagens.add(msg);
-            Log.d(TAG, "AdicionaMsg: " + msg);
+            if (!msg.toString().isEmpty() && !DroidCommon.Mensagens.contains(msg)) {
+                Mensagens.add(msg);
+                Log.d(TAG, "AdicionaMsg: " + msg);
+            }
         } catch (Exception ex) {
             Log.d(TAG, "Erro AdicionaMsg: " + ex.getMessage());
         }

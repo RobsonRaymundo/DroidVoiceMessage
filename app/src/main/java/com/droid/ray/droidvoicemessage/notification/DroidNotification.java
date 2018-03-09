@@ -24,9 +24,11 @@ public class DroidNotification extends DroidBaseNotification {
     private void EnviaMsg(Context context) {
         try {
             Intent intentTTS = new Intent(context, DroidTTS.class);
-            AguardandoTerminoServico(context, intentTTS);
-            Log.d(TAG, "EnviaMsg - startService");
-            context.startService(intentTTS);
+            AguardandoTerminoServico(intentTTS);
+            if (DroidCommon.Mensagens.size() > 0) {
+                Log.d(TAG, "EnviaMsg - startService");
+                context.startService(intentTTS);
+            }
         } catch (Exception ex) {
             Log.d(TAG, "Erro EnviaMsg " + ex.getMessage());
         }
@@ -36,10 +38,7 @@ public class DroidNotification extends DroidBaseNotification {
     public void onNotificationPosted(StatusBarNotification sbn) {
         msg = getNotificationKitKat(sbn);
         Log.d(TAG, "onNotificationPosted: " + msg);
-
-        if (!msg.toString().isEmpty()) {
-            DroidCommon.AdicionaMsg(msg);
-        }
+        DroidCommon.AdicionaMsg(msg);
         EnviaMsg(getBaseContext());
     }
 
@@ -47,6 +46,7 @@ public class DroidNotification extends DroidBaseNotification {
         String titleMsg = msg.toLowerCase();
         return !titleMsg.toLowerCase().equals("ícones de bate-papo ativos") &&
                 !titleMsg.toLowerCase().contains("mensagens):") &&
+                !titleMsg.toLowerCase().contains("whatsapp web") &&
                 !titleMsg.toLowerCase().equals("mensagens está em execução");
 
     }
@@ -94,7 +94,7 @@ public class DroidNotification extends DroidBaseNotification {
         return notif;
     }
 
-    private void AguardandoTerminoServico(final Context context, final Intent intentTTS) {
+    private void AguardandoTerminoServico( final Intent intentTTS) {
 
         if (DroidTTS.tts != null) {
             new Thread(new Runnable() {
