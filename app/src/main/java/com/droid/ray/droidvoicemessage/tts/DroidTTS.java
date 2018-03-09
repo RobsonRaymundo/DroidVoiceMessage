@@ -20,7 +20,7 @@ import static com.droid.ray.droidvoicemessage.common.DroidCommon.TAG;
  */
 
 public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
-    private TextToSpeech tts;
+    public static TextToSpeech tts;
     private Context context;
     private String msg;
 
@@ -51,7 +51,7 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
         Log.d(TAG, "onInit ");
         if (!msg.isEmpty()) {
             Fala(msg);
-            AguardandoFalar();
+            AguardandoFalar(msg);
         }
 
 
@@ -108,14 +108,14 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
         }
     }
 
-    private void AguardandoFalar() {
+    private void AguardandoFalar(String texto) {
         new Thread(new Runnable() {
             public void run() {
 
                 try {
 
                     while (tts.isSpeaking()) {
-                        Log.d(TAG, "AguardandoFalar");
+                        Log.d(TAG, "AguardandoFalar: " + msg);
                         DroidCommon.TimeSleep(500);
                     }
                 }
@@ -131,10 +131,28 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
         try {
             Log.d(TAG, "PararServico");
             //   stopSelf();
-            DroidCommon.emServico = false;
+         //   DroidCommon.emServico = false;
+            DroidCommon.TimeSleep(1000);
         } catch (Exception ex) {
-            Log.d(TAG, "PararServico: " + ex.getMessage());
+            Log.d(TAG, "Erro PararServico: " + ex.getMessage());
 
         }
+    }
+    public static boolean isSpeaking()
+    {
+        boolean falando = false;
+
+        try {
+
+            if (tts != null) {
+                falando = tts.isSpeaking();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.d(TAG, "Erro isSpeaking: " + ex.getMessage());
+        }
+
+        return falando;
     }
 }

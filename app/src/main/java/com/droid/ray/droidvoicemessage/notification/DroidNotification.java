@@ -29,7 +29,7 @@ public class DroidNotification extends DroidBaseNotification {
     private void EnviaMsg(Context context, String msg, String msgs) {
         try {
             Intent intentTTS = new Intent(context, DroidTTS.class);
-            DroidCommon.emServico = true;
+         //   DroidCommon.emServico = true;
             AguardandoTerminoServico(context, intentTTS);
             //  DroidCommon.TimeSleep(1000);
             intentTTS.putExtra("msg",  msgs + " " + msg);
@@ -49,11 +49,17 @@ public class DroidNotification extends DroidBaseNotification {
 
         Log.d(TAG, "msg: " + msg);
         Log.d(TAG, "msgs:" + DroidCommon.msgs);
+        Log.d(TAG, "todasMsgs:" + DroidCommon.todasMsgs);
+
         Log.d(TAG, "--------------------------------------------");
+
+
 
         if (!msg.toString().isEmpty()) {
 
-            if (DroidCommon.emServico) {
+            DroidCommon.todasMsgs = DroidCommon.todasMsgs  + " " + msg;
+
+            if (DroidTTS.isSpeaking()) {
                 DroidCommon.msgs =  DroidCommon.msgs + " " + msg;
             } else {
                 EnviaMsg(context,  msg, DroidCommon.msgs);
@@ -65,9 +71,10 @@ public class DroidNotification extends DroidBaseNotification {
     private void AguardandoTerminoServico(final Context context, final Intent intentTTS) {
         Log.d(TAG, "AguardandoTerminoServico");
 
+
         new Thread(new Runnable() {
             public void run() {
-                while (DroidCommon.emServico) {
+                while (DroidTTS.isSpeaking()) {
                     Log.d(TAG, "AguardandoTerminoServico");
                     DroidCommon.TimeSleep(500);
                 }
