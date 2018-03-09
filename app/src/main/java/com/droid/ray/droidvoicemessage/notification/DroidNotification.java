@@ -2,21 +2,17 @@ package com.droid.ray.droidvoicemessage.notification;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
 import com.droid.ray.droidvoicemessage.tts.DroidTTS;
 
 import static com.droid.ray.droidvoicemessage.common.DroidCommon.TAG;
-import static com.droid.ray.droidvoicemessage.common.DroidCommon.msgs;
-
 
 /**
  * Created by Robson on 03/02/2016.
@@ -25,67 +21,26 @@ import static com.droid.ray.droidvoicemessage.common.DroidCommon.msgs;
 public class DroidNotification extends DroidBaseNotification {
     private String msg;
 
-
-    private void EnviaMsg(Context context, String msg, String msgs) {
+    private void EnviaMsg(Context context) {
         try {
             Intent intentTTS = new Intent(context, DroidTTS.class);
-         //   DroidCommon.emServico = true;
             AguardandoTerminoServico(context, intentTTS);
-            //  DroidCommon.TimeSleep(1000);
-            intentTTS.putExtra("msg",  msgs + " " + msg);
-            DroidCommon.msgs = "";
-            Log.d(TAG, "onNotificationPosted - startService");
+            Log.d(TAG, "EnviaMsg - startService");
             context.startService(intentTTS);
         } catch (Exception ex) {
-            Log.d(TAG, "onNotificationPosted " + ex.getMessage());
+            Log.d(TAG, "Erro EnviaMsg " + ex.getMessage());
         }
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        final Context context = getBaseContext();
-        Log.d(TAG, "onNotificationPosted inicial");
         msg = getNotificationKitKat(sbn);
-
-        Log.d(TAG, "msg: " + msg);
-        Log.d(TAG, "msgs:" + DroidCommon.msgs);
-        Log.d(TAG, "todasMsgs:" + DroidCommon.todasMsgs);
-
-        Log.d(TAG, "--------------------------------------------");
-
-
+        Log.d(TAG, "onNotificationPosted: " + msg);
 
         if (!msg.toString().isEmpty()) {
-
-            DroidCommon.todasMsgs = DroidCommon.todasMsgs  + " " + msg;
-
-            if (DroidTTS.isSpeaking()) {
-                DroidCommon.msgs =  DroidCommon.msgs + " " + msg;
-            } else {
-                EnviaMsg(context,  msg, DroidCommon.msgs);
-
-            }
+            DroidCommon.AdicionaMsg(msg);
         }
-    }
-
-    private void AguardandoTerminoServico(final Context context, final Intent intentTTS) {
-        Log.d(TAG, "AguardandoTerminoServico");
-
-
-        new Thread(new Runnable() {
-            public void run() {
-                while (DroidTTS.isSpeaking()) {
-                    Log.d(TAG, "AguardandoTerminoServico");
-                    DroidCommon.TimeSleep(500);
-                }
-                try {
-                    Log.d(TAG, "ParandoServico");
-                    stopService(intentTTS);
-                } catch (Exception ex) {
-                    Log.d(TAG, "stopService: " + ex.getMessage());
-                }
-            }
-        }).start();
+        EnviaMsg(getBaseContext());
     }
 
     private boolean FilterTitleNotification(String msg) {
@@ -134,12 +89,30 @@ public class DroidNotification extends DroidBaseNotification {
 
                 notif = SetNotif(notif);
 
-                Log.d(TAG, "tit: " + tit);
-                Log.d(TAG, notif + notif);
-                Log.d(TAG, "--------------------------------------------");
             }
         }
         return notif;
     }
+
+    private void AguardandoTerminoServico(final Context context, final Intent intentTTS) {
+
+        if (DroidTTS.tts != null) {
+            new Thread(new Runnable() {
+                public void run() {
+                    while (DroidTTS.tts.isSpeaking()) {
+                        Log.d(TAG, "AguardandoTerminoServico");
+                        DroidCommon.TimeSleep(500);
+                    }
+                    try {
+                        Log.d(TAG, "ParandoServico");
+                        stopService(intentTTS);
+                    } catch (Exception ex) {
+                        Log.d(TAG, "stopService: " + ex.getMessage());
+                    }
+                }
+            }).start();
+        }
+    }
+
 
 }

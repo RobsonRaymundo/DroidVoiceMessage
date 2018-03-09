@@ -7,10 +7,9 @@ import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
-
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 import static com.droid.ray.droidvoicemessage.common.DroidCommon.TAG;
@@ -22,7 +21,6 @@ import static com.droid.ray.droidvoicemessage.common.DroidCommon.TAG;
 public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     public static TextToSpeech tts;
     private Context context;
-    private String msg;
 
 
     @Nullable
@@ -43,19 +41,24 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
         Log.d(TAG, "onStart ");
-        ObtemMsg(intent);
     }
 
     @Override
     public void onInit(int i) {
         Log.d(TAG, "onInit ");
-        if (!msg.isEmpty()) {
-            Fala(msg);
-            AguardandoFalar(msg);
+        ExibirTodasMensagensOriginal();
+        if (!tts.isSpeaking()) {
+            ArrayList<String> mensagens = new ArrayList<>();
+            mensagens.addAll(DroidCommon.Mensagens);
+            for (String str : mensagens) {
+                Fala(str);
+                DroidCommon.RemoverMsg(str);
+            }
+
         }
-
-
+        ExibirTodasMensagens();
     }
+
 
     @Override
     public void onDestroy() {
@@ -63,15 +66,6 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
         Log.d(TAG, "onDestroy ");
         ZerarObjeto();
         super.onDestroy();
-    }
-
-    private void ObtemMsg(Intent intent) {
-        try {
-            msg = intent.getStringExtra("msg");
-            Log.d(TAG, "ObtemMsg " + msg);
-        } catch (Exception ex) {
-            Log.d(TAG, "ObtemMsg: " + ex.getMessage());
-        }
     }
 
 
@@ -98,61 +92,37 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     }
 
 
-    private void Fala(String texto) {
+    private void Fala(final String texto) {
         try {
-            Toast.makeText(context, texto, Toast.LENGTH_SHORT).show();
+            //   Toast.makeText(context, texto, Toast.LENGTH_SHORT).show();
             tts.speak(texto, TextToSpeech.QUEUE_FLUSH, null);
-            Log.d(TAG, "Fala");
+            Log.d(TAG, "Fala " + texto);
+
+            while (tts.isSpeaking()) {
+                Log.d(TAG, "AguardandoFalar: " + texto + " " + tts.isSpeaking());
+                DroidCommon.TimeSleep(500);
+            }
+            Log.d(TAG, "AguardandoFalar: " + texto + " " + tts.isSpeaking());
+
+
         } catch (Exception ex) {
             Log.d(TAG, "Fala: " + ex.getMessage());
         }
     }
 
-    private void AguardandoFalar(String texto) {
-        new Thread(new Runnable() {
-            public void run() {
 
-                try {
-
-                    while (tts.isSpeaking()) {
-                        Log.d(TAG, "AguardandoFalar: " + msg);
-                        DroidCommon.TimeSleep(500);
-                    }
-                }
-                finally {
-                    PararServico();
-                }
-
-            }
-        }).start();
-    }
-
-    private void PararServico() {
-        try {
-            Log.d(TAG, "PararServico");
-            //   stopSelf();
-         //   DroidCommon.emServico = false;
-            DroidCommon.TimeSleep(1000);
-        } catch (Exception ex) {
-            Log.d(TAG, "Erro PararServico: " + ex.getMessage());
-
+    private static void ExibirTodasMensagensOriginal() {
+        Log.d(TAG, "--------------------------------------------");
+        for (String str : DroidCommon.Mensagens) {
+            Log.d(TAG, "ExibirTodasMensagensOriginal: " + str);
         }
     }
-    public static boolean isSpeaking()
-    {
-        boolean falando = false;
 
-        try {
-
-            if (tts != null) {
-                falando = tts.isSpeaking();
-            }
+    private static void ExibirTodasMensagens() {
+        Log.d(TAG, "--------------------------------------------");
+        for (String str : DroidCommon.Mensagens) {
+            Log.d(TAG, "ExibirTodasMensagens: " + str);
         }
-        catch (Exception ex)
-        {
-            Log.d(TAG, "Erro isSpeaking: " + ex.getMessage());
-        }
-
-        return falando;
     }
+
 }
