@@ -98,7 +98,7 @@ public class DroidPhoneService extends Service {
                         Log.d(TAG, "Houve algum problema ao obter o estado do fone de ouvido");
                 }
                 if (!message.isEmpty()) {
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+               //     Toast.makeText(context, message, Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -163,7 +163,7 @@ public class DroidPhoneService extends Service {
         }
 
         if (!message.isEmpty()) {
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+      //      Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             //   buildNotification(message);
         }
     }
