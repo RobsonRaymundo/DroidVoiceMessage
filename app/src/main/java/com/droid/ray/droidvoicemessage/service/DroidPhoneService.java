@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.droid.ray.droidvoicemessage.activity.MainActivity;
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
+import com.droid.ray.droidvoicemessage.common.DroidPreferences;
 
 /**
  * Created by Robson on 29/01/2018.
@@ -82,17 +83,23 @@ public class DroidPhoneService extends Service {
                 String message= "";
                 switch (state) {
                     case 0:
-                        message = "Fone de ouvido desconectado";
-                        DroidCommon.ShowListener(context);
+                        if ( DroidPreferences.GetString(context, "foneOuvido") == "1") {
+                            DroidPreferences.SetString(context, "foneOuvido", "0");
+                            DroidCommon.ShowListener(context);
+                            message = "Fone de ouvido desconectado";
+                        }
                         break;
                     case 1:
-                        message = "Fone de ouvido conectado";
                         DroidCommon.ShowListener(context);
+                        message = "Fone de ouvido conectado";
+                        DroidPreferences.SetString(context, "foneOuvido", "1");
                         break;
                     default:
                         Log.d(TAG, "Houve algum problema ao obter o estado do fone de ouvido");
                 }
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                if (!message.isEmpty()) {
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
@@ -134,6 +141,7 @@ public class DroidPhoneService extends Service {
         switch (state) {
             case BluetoothHeadset.STATE_CONNECTED:
                 message = "Dispositivo bluetouch conectado";
+                DroidPreferences.SetString(context, "foneBlueTouch", "1");
                 DroidCommon.ShowListener(context);
                 break;
             case BluetoothHeadset.STATE_CONNECTING:
@@ -143,15 +151,20 @@ public class DroidPhoneService extends Service {
                 message = "Disconectano o dispositivo bluetouch";
                 break;
             case BluetoothHeadset.STATE_DISCONNECTED:
-                DroidCommon.ShowListener(context);
-                message = "Dispositivo bluetouch desconectado";
+                if ( DroidPreferences.GetString(context, "foneBlueTouch") == "1") {
+                    DroidPreferences.SetString(context, "foneBlueTouch", "0");
+                    DroidCommon.ShowListener(context);
+                    message = "Dispositivo bluetouch desconectado";
+                }
                 break;
             default:
-                message = "Connect Unknown";
+                message = "Dispositivo desconhecidos";
                 break;
         }
 
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-        //   buildNotification(message);
+        if (!message.isEmpty()) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            //   buildNotification(message);
+        }
     }
 }
