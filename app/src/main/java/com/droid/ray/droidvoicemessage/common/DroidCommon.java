@@ -15,9 +15,7 @@ import java.util.ArrayList;
 
 public class DroidCommon {
     public static final String TAG = "VoiceMessage";
-    // public static boolean emServico = false;
-    //   public static String msgs = "";
-//    public static String todasMsgs = "";
+    public static String ultimaFrase = "";
     public static ArrayList<String> Mensagens = new ArrayList<>();
 
     public static void ShowListener(Context context) {

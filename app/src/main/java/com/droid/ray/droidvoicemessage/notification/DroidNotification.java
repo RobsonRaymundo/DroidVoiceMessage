@@ -52,8 +52,8 @@ public class DroidNotification extends DroidBaseNotification {
     }
 
     private String SetNotif(String notif) {
-        String notifMsg = notif.toLowerCase();
-        if (notifMsg.equals("procurando novas mensagens") || notifMsg.equals("mensagens está em execução")) {
+        String notifLower = notif.toLowerCase();
+        if (notif.equals(DroidCommon.ultimaFrase) ||  notifLower.equals("procurando novas mensagens") || notifLower.equals("mensagens está em execução")) {
             notif = "";
         }
 

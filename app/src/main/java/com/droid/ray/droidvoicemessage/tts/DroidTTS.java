@@ -102,6 +102,8 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
                 Log.d(TAG, "AguardandoFalar: " + texto + " " + tts.isSpeaking());
                 DroidCommon.TimeSleep(500);
             }
+            DroidCommon.ultimaFrase = texto;
+            DroidCommon.TimeSleep(1000);
             Log.d(TAG, "AguardandoFalar: " + texto + " " + tts.isSpeaking());
 
 
