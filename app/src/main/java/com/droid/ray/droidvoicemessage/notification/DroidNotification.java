@@ -24,8 +24,8 @@ public class DroidNotification extends DroidBaseNotification {
     private void EnviaMsg(Context context) {
         try {
             Intent intentTTS = new Intent(context, DroidTTS.class);
-            AguardandoTerminoServico(intentTTS);
-            if (DroidCommon.Mensagens.size() > 0) {
+            WaitingEndService(intentTTS);
+            if (DroidCommon.Notification.size() > 0) {
                 Log.d(TAG, "EnviaMsg - startService");
                 context.startService(intentTTS);
             }
@@ -38,26 +38,9 @@ public class DroidNotification extends DroidBaseNotification {
     public void onNotificationPosted(StatusBarNotification sbn) {
         msg = getNotificationKitKat(sbn);
         Log.d(TAG, "onNotificationPosted: " + msg);
-        DroidCommon.AdicionaMsg(msg);
+        DroidCommon.AddNotification(msg);
+        DroidCommon.AddAllNotification(msg);
         EnviaMsg(getBaseContext());
-    }
-
-    private boolean FilterTitleNotification(String msg) {
-        String titleMsg = msg.toLowerCase();
-        return !titleMsg.toLowerCase().equals("ícones de bate-papo ativos") &&
-                !titleMsg.toLowerCase().contains("mensagens):") &&
-                !titleMsg.toLowerCase().contains("whatsapp web") &&
-                !titleMsg.toLowerCase().equals("mensagens está em execução");
-
-    }
-
-    private String SetNotif(String notif) {
-        String notifLower = notif.toLowerCase();
-        if (notif.equals(DroidCommon.ultimaFrase) ||  notifLower.equals("procurando novas mensagens") || notifLower.equals("mensagens está em execução")) {
-            notif = "";
-        }
-
-        return notif;
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -71,7 +54,7 @@ public class DroidNotification extends DroidBaseNotification {
             Bundle extras = mStatusBarNotification.getNotification().extras;
             tit = (String) extras.getCharSequence(Notification.EXTRA_TITLE); // Title
 
-            if (FilterTitleNotification(tit)) {
+            if (DroidCommon.FilterTitleNotification(tit)) {
                 CharSequence desc = extras.getCharSequence(Notification.EXTRA_TEXT); // / Description
 
                 try {
@@ -87,24 +70,24 @@ public class DroidNotification extends DroidBaseNotification {
                     notif = tit + " " + notif;
                 }
 
-                notif = SetNotif(notif);
+                notif = DroidCommon.SetNotification(notif);
 
             }
         }
         return notif;
     }
 
-    private void AguardandoTerminoServico( final Intent intentTTS) {
+    private void WaitingEndService( final Intent intentTTS) {
 
         if (DroidTTS.tts != null) {
             new Thread(new Runnable() {
                 public void run() {
                     while (DroidTTS.tts.isSpeaking()) {
-                        Log.d(TAG, "AguardandoTerminoServico");
+                        Log.d(TAG, "WaitingEndService");
                         DroidCommon.TimeSleep(500);
                     }
                     try {
-                        Log.d(TAG, "ParandoServico");
+                        Log.d(TAG, "StopService");
                         stopService(intentTTS);
                     } catch (Exception ex) {
                         Log.d(TAG, "stopService: " + ex.getMessage());

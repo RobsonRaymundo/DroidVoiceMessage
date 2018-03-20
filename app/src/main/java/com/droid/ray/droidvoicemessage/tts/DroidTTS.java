@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate ");
-        InicializarObjetos();
+        InitializeObjects();
     }
 
     @Override
@@ -46,17 +47,22 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     @Override
     public void onInit(int i) {
         Log.d(TAG, "onInit ");
-        ExibirTodasMensagensOriginal();
+        ShowNotification();
         if (!tts.isSpeaking()) {
             ArrayList<String> mensagens = new ArrayList<>();
-            mensagens.addAll(DroidCommon.Mensagens);
+            mensagens.addAll(DroidCommon.Notification);
             for (String str : mensagens) {
-                Fala(str);
-                DroidCommon.RemoverMsg(str);
+                Speak(str);
+                DroidCommon.RemoveNotification(str);
             }
-
+            if (DroidCommon.AllNotification.size() > 200) {
+                DroidCommon.AllNotification.clear();
+                if (mensagens != null) {
+                    DroidCommon.AllNotification.addAll(mensagens);
+                }
+            }
         }
-        ExibirTodasMensagens();
+        ShowNotification();
     }
 
 
@@ -64,23 +70,23 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     public void onDestroy() {
         // TODO Auto-generated method stub
         Log.d(TAG, "onDestroy ");
-        ZerarObjeto();
+        ResetObject();
         super.onDestroy();
     }
 
 
-    private void InicializarObjetos() {
+    private void InitializeObjects() {
         try {
             context = getBaseContext();
             tts = new TextToSpeech(context, this);
             tts.setLanguage(Locale.getDefault());
-            Log.d(TAG, "InicializarObjetos ");
+            Log.d(TAG, "InitializeObjects ");
         } catch (Exception ex) {
-            Log.d(TAG, "InicializarObjetos: " + ex.getMessage());
+            Log.d(TAG, "InitializeObjects: " + ex.getMessage());
         }
     }
 
-    private void ZerarObjeto() {
+    private void ResetObject() {
         if (tts != null) {
             try {
                 tts.stop();
@@ -92,38 +98,29 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     }
 
 
-    private void Fala(final String texto) {
+    private void Speak(final String texto) {
         try {
             //   Toast.makeText(context, texto, Toast.LENGTH_SHORT).show();
             tts.speak(texto, TextToSpeech.QUEUE_FLUSH, null);
-            Log.d(TAG, "Fala " + texto);
+            Log.d(TAG, "Speak " + texto);
 
             while (tts.isSpeaking()) {
-                Log.d(TAG, "AguardandoFalar: " + texto + " " + tts.isSpeaking());
+                Log.d(TAG, "isSpeaking?: " + texto + " " + tts.isSpeaking());
                 DroidCommon.TimeSleep(500);
             }
-            DroidCommon.ultimaFrase = texto;
             DroidCommon.TimeSleep(1000);
-            Log.d(TAG, "AguardandoFalar: " + texto + " " + tts.isSpeaking());
+            Log.d(TAG, "isSpeaking?: " + texto + " " + tts.isSpeaking());
 
 
         } catch (Exception ex) {
-            Log.d(TAG, "Fala: " + ex.getMessage());
+            Log.d(TAG, "Speak: " + ex.getMessage());
         }
     }
 
-
-    private static void ExibirTodasMensagensOriginal() {
+    private static void ShowNotification() {
         Log.d(TAG, "--------------------------------------------");
-        for (String str : DroidCommon.Mensagens) {
-            Log.d(TAG, "ExibirTodasMensagensOriginal: " + str);
-        }
-    }
-
-    private static void ExibirTodasMensagens() {
-        Log.d(TAG, "--------------------------------------------");
-        for (String str : DroidCommon.Mensagens) {
-            Log.d(TAG, "ExibirTodasMensagens: " + str);
+        for (String str : DroidCommon.Notification) {
+            Log.d(TAG, "ShowNotification: " + str);
         }
     }
 
