@@ -10,6 +10,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
+import com.droid.ray.droidvoicemessage.common.DroidPreferences;
 import com.droid.ray.droidvoicemessage.tts.DroidTTS;
 
 import static com.droid.ray.droidvoicemessage.common.DroidCommon.TAG;
@@ -68,6 +69,18 @@ public class DroidNotification extends DroidBaseNotification {
 
                 if (!tit.toLowerCase().equals("whatsapp")) {
                     notif = tit + " " + notif;
+
+                    try {
+                        String PrefNotif = DroidPreferences.GetString(getBaseContext(), tit);
+
+                        if (PrefNotif.equals("")) {
+                            DroidPreferences.SetString(getBaseContext(), tit, "N");
+                        } else if (PrefNotif.equals("S")) {
+                            notif = "";
+                        }
+                    } catch (Exception ex) {
+                        Log.d(TAG, "DroidPreferences: " + ex.getMessage());
+                    }
                 }
 
                 notif = DroidCommon.SetNotification(notif);
@@ -77,7 +90,7 @@ public class DroidNotification extends DroidBaseNotification {
         return notif;
     }
 
-    private void WaitingEndService( final Intent intentTTS) {
+    private void WaitingEndService(final Intent intentTTS) {
 
         if (DroidTTS.tts != null) {
             new Thread(new Runnable() {

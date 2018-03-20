@@ -3,6 +3,8 @@ package com.droid.ray.droidvoicemessage.common;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Map;
+
 /**
  * Created by Robson on 31/07/2017.
  */
@@ -36,6 +38,12 @@ public class DroidPreferences {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_ID, 0);
         String i = sharedPreferences.getString(chave, "");
         return i;
+
+    }
+
+    public static Map<String, ?> GetAllString(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_ID, 0);
+        return sharedPreferences.getAll();
 
     }
 }

@@ -4,17 +4,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Vibrator;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
+import com.droid.ray.droidvoicemessage.R;
 import com.droid.ray.droidvoicemessage.service.DroidPhoneService;
 import com.droid.ray.droidvoicemessage.tts.DroidTTS;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created by Robson on 04/08/2017.
  */
 
 public class DroidCommon {
+    private static Context contextCommon;
     public static final String TAG = "VoiceMessage";
     public static ArrayList<String> Notification = new ArrayList<>();
     public static ArrayList<String> AllNotification = new ArrayList<>();
@@ -87,5 +98,72 @@ public class DroidCommon {
 
     }
 
+    public static void ShowLayout(Context context, ViewGroup layout) {
+        contextCommon = context;
+        ScrollView sv = new ScrollView(context);
+        final LinearLayout ll = new LinearLayout(context);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        sv.addView(ll);
 
+        TextView tvs = new TextView(context);
+        tvs.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        tvs.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
+        tvs.setTextColor(context.getResources().getColor(R.color.colorBlack));
+        tvs.setPadding(0,0,0,60);
+        tvs.setText("Permita que o Voice Message tenha acesso a notificações");
+        ll.addView(tvs);
+
+        Button btn = new Button(context);
+        btn.setText("Voice Message");
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ShowListener(contextCommon);
+            }
+        });
+
+        ll.addView(btn);
+
+        TextView tv = new TextView(context);
+        tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
+        tv.setTextColor(context.getResources().getColor(R.color.colorBlack));
+        tv.setPadding(0,100,0,60);
+        tv.setText("Selecione abaixo os contatos que serão bloqueados na síntese de voz");
+        ll.addView(tv);
+
+        for (Map.Entry<String, ?> key : DroidPreferences.GetAllString(context).entrySet()) {
+            CheckBox ch = new CheckBox(context);
+            contextCommon = context;
+            ch.setText(key.getKey());
+            ch.setOnClickListener(getOnClickCheckBox(ch));
+            ch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+            if (key.getValue().equals("S"))
+            {
+                ch.setChecked(true);
+            }
+            ll.addView(ch);
+        }
+
+        //this.setContentView(sv);  // this causes the fab to fail
+        layout.addView(sv);
+
+    }
+
+
+    static View.OnClickListener getOnClickCheckBox(final CheckBox checkBox) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String valor = "N";
+
+                if (checkBox.isChecked()) {
+                    valor = "S";
+                }
+
+                DroidPreferences.SetString(contextCommon, checkBox.getText().toString(), valor);
+
+            }
+        };
+    }
 }
