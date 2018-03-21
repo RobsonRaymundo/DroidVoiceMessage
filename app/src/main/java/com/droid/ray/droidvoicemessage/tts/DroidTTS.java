@@ -47,12 +47,23 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     @Override
     public void onInit(int i) {
         Log.d(TAG, "onInit ");
-        LoopingNotification();
+
+        if (DroidCommon.LoopingNotification == false && tts.isSpeaking() == false) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        LoopingNotification();
+                    } catch (Exception ex) {
+                        Log.d(TAG, "Init: " + ex.getMessage());
+                    }
+                }
+            }).start();
+        }
     }
 
-    private void LoopingNotification()
-    {
-        if (!tts.isSpeaking()) {
+    private void LoopingNotification() {
+        try {
+            DroidCommon.LoopingNotification = true;
             ShowNotification();
             ArrayList<String> mensagens = new ArrayList<>();
             mensagens.addAll(DroidCommon.Notification);
@@ -69,7 +80,10 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
                 }
             }
             ShowNotification();
+        } finally {
+            DroidCommon.LoopingNotification = false;
         }
+
     }
 
     @Override

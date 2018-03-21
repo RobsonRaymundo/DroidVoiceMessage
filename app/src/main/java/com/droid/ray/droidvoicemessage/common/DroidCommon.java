@@ -31,6 +31,7 @@ public class DroidCommon {
     public static ArrayList<String> AllNotification = new ArrayList<>();
     public static Boolean inCall = false;
     public static Boolean InThread = false;
+    public static Boolean LoopingNotification = false;
 
 
     public static void EnviaMsg(Context context) {
