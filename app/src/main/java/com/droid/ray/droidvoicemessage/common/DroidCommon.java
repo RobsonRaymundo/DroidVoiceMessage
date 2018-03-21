@@ -29,8 +29,86 @@ public class DroidCommon {
     public static final String TAG = "VoiceMessage";
     public static ArrayList<String> Notification = new ArrayList<>();
     public static ArrayList<String> AllNotification = new ArrayList<>();
-    public static Boolean InCall = false;
+    public static Boolean inCall = false;
     public static Boolean InThread = false;
+
+
+    public static void EnviaMsg(Context context) {
+        if (DroidCommon.InThread == false) {
+            try {
+                Intent intentTTS = new Intent(context, DroidTTS.class);
+                WaitingEndService(intentTTS, context);
+                if (DroidCommon.Notification.size() > 0) {
+                    Log.d(TAG, "EnviaMsg - startService");
+                    context.startService(intentTTS);
+                }
+            } catch (Exception ex) {
+                Log.d(TAG, "Erro EnviaMsg " + ex.getMessage());
+            }
+        }
+    }
+
+    public static void WaitingEndService(final Intent intentTTS, final Context context) {
+
+        if (DroidTTS.tts != null) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        DroidCommon.InThread = true;
+                        while (DroidTTS.tts.isSpeaking()) {
+                            Log.d(TAG, "WaitingEndService");
+                            DroidCommon.TimeSleep(500);
+                        }
+                        try {
+                            Log.d(TAG, "StopService");
+                            context.stopService(intentTTS);
+                        } catch (Exception ex) {
+                            Log.d(TAG, "stopService: " + ex.getMessage());
+                        }
+                    } finally {
+                        DroidCommon.InThread = false;
+                    }
+                }
+            }).start();
+        }
+    }
+
+
+    public static void InCall() {
+        if (DroidCommon.inCall) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        while (DroidCommon.inCall) {
+                            Log.d(TAG, "WaitingEndCall");
+                            DroidCommon.TimeSleep(2000);
+                        }
+                    } catch (Exception ex) {
+                        Log.d(TAG, "WaitingEndCall: " + ex.getMessage());
+                    }
+                }
+            }).start();
+        }
+    }
+
+    public static void WaitingEndCall(Context context) {
+        if (DroidCommon.inCall) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        while (DroidCommon.inCall) {
+                            Log.d(TAG, "WaitingEndCall");
+                            DroidCommon.TimeSleep(2000);
+                        }
+                    } catch (Exception ex) {
+                        Log.d(TAG, "WaitingEndCall: " + ex.getMessage());
+                    }
+                    //EnviaMsg(getBaseContext());
+                }
+            }).start();
+        } else EnviaMsg(context);
+    }
+
 
     public static String SetNotification(String notif) {
         String notifLower = notif.toLowerCase();
@@ -111,7 +189,7 @@ public class DroidCommon {
         tvs.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tvs.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
         tvs.setTextColor(context.getResources().getColor(R.color.colorBlack));
-        tvs.setPadding(0,0,0,60);
+        tvs.setPadding(0, 0, 0, 60);
         tvs.setText("Permita que o Voice Message tenha acesso a notificações");
         ll.addView(tvs);
 
@@ -130,7 +208,7 @@ public class DroidCommon {
         tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
         tv.setTextColor(context.getResources().getColor(R.color.colorBlack));
-        tv.setPadding(0,100,0,60);
+        tv.setPadding(0, 100, 0, 60);
         tv.setText("Selecione abaixo os contatos que serão bloqueados na síntese de voz");
         ll.addView(tv);
 
@@ -141,8 +219,7 @@ public class DroidCommon {
             ch.setOnClickListener(getOnClickCheckBox(ch));
             ch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 
-            if (key.getValue().equals("S"))
-            {
+            if (key.getValue().equals("S")) {
                 ch.setChecked(true);
             }
             ll.addView(ch);

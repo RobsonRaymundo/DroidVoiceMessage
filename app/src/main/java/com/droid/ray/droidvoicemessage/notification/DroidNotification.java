@@ -24,21 +24,6 @@ public class DroidNotification extends DroidBaseNotification {
     private String msg;
 
 
-    private void EnviaMsg(Context context) {
-        if ( DroidCommon.InThread == false) {
-            try {
-                Intent intentTTS = new Intent(context, DroidTTS.class);
-                WaitingEndService(intentTTS);
-                if (DroidCommon.Notification.size() > 0) {
-                    Log.d(TAG, "EnviaMsg - startService");
-                    context.startService(intentTTS);
-                }
-            } catch (Exception ex) {
-                Log.d(TAG, "Erro EnviaMsg " + ex.getMessage());
-            }
-        }
-    }
-
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         try {
@@ -46,10 +31,8 @@ public class DroidNotification extends DroidBaseNotification {
             Log.d(TAG, "onNotificationPosted: " + msg);
             DroidCommon.AddNotification(msg);
             DroidCommon.AddAllNotification(msg);
-            WaitingEndCall();
-        }
-        catch (Exception ex)
-        {
+            DroidCommon.WaitingEndCall(getBaseContext());
+        } catch (Exception ex) {
             Log.d(TAG, "onNotificationPosted: " + ex.getMessage());
         }
     }
@@ -99,51 +82,6 @@ public class DroidNotification extends DroidBaseNotification {
         }
         return notif;
     }
-
-    private void WaitingEndService(final Intent intentTTS) {
-
-        if (DroidTTS.tts != null) {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        DroidCommon.InThread = true;
-                        while (DroidTTS.tts.isSpeaking()) {
-                            Log.d(TAG, "WaitingEndService");
-                            DroidCommon.TimeSleep(500);
-                        }
-                        try {
-                            Log.d(TAG, "StopService");
-                            stopService(intentTTS);
-                        } catch (Exception ex) {
-                            Log.d(TAG, "stopService: " + ex.getMessage());
-                        }
-                    }
-                    finally {
-                        DroidCommon.InThread = false;
-                    }
-                }
-            }).start();
-        }
-    }
-
-    private void WaitingEndCall() {
-        if (DroidCommon.InCall) {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        while (DroidCommon.InCall) {
-                            Log.d(TAG, "WaitingEndCall");
-                            DroidCommon.TimeSleep(2000);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.d(TAG, "WaitingEndCall: " + ex.getMessage());
-                    }
-                    EnviaMsg(getBaseContext());
-                }
-            }).start();
-        }
-        else  EnviaMsg(getBaseContext());
-    }
 }
+
+

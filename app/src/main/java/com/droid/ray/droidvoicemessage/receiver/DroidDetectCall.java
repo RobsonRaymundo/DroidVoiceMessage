@@ -24,22 +24,20 @@ public class DroidDetectCall extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "onReceiver - Call");
 
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
         if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {
             savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
-        }
-        else{
+        } else {
             String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
             String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
             int state = 0;
-            if(stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)){
+            if (stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
                 state = TelephonyManager.CALL_STATE_IDLE;
-            }
-            else if(stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)){
+            } else if (stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
                 state = TelephonyManager.CALL_STATE_OFFHOOK;
-            }
-            else if(stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)){
+            } else if (stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
                 state = TelephonyManager.CALL_STATE_RINGING;
             }
 
@@ -54,8 +52,10 @@ public class DroidDetectCall extends BroadcastReceiver {
     //Incoming call-  goes from IDLE to RINGING when it rings, to OFFHOOK when it's answered, to IDLE when its hung up
     //Outgoing call-  goes from IDLE to OFFHOOK when it dials out, to IDLE when hung up
     public void onCallStateChanged(Context context, int state, String number) {
-        if(lastState == state){
+
+        if (lastState == state) {
             //No change, debounce extras
+            Log.d(TAG, "onReceiver - lastState = state");
             return;
         }
         switch (state) {
@@ -64,35 +64,37 @@ public class DroidDetectCall extends BroadcastReceiver {
                 callStartTime = new Date();
                 savedNumber = number;
                 Log.d(TAG, "onIncomingCallStarted");
-                DroidCommon.InCall = true;
+                DroidCommon.inCall = true;
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
                 //Transition of ringing->offhook are pickups of incoming calls.  Nothing done on them
-                if(lastState != TelephonyManager.CALL_STATE_RINGING){
+                if (lastState != TelephonyManager.CALL_STATE_RINGING) {
                     isIncoming = false;
                     callStartTime = new Date();
                     Log.d(TAG, "onOutgoingCallStarted");
-                    DroidCommon.InCall = true;
+                    DroidCommon.inCall = true;
                 }
                 break;
             case TelephonyManager.CALL_STATE_IDLE:
                 //Went to idle-  this is the end of a call.  What type depends on previous state(s)
-                if(lastState == TelephonyManager.CALL_STATE_RINGING){
+                if (lastState == TelephonyManager.CALL_STATE_RINGING) {
                     //Ring but no pickup-  a miss
                     Log.d(TAG, "onMissedCall");
-                    DroidCommon.InCall = false;
+                    DroidCommon.inCall = false;
 
-                }
-                else if(isIncoming){
+                } else if (isIncoming) {
                     Log.d(TAG, "onIncomingCallEnded");
-                    DroidCommon.InCall = false;
-                }
-                else{
+                    DroidCommon.inCall = false;
+                } else {
                     Log.d(TAG, "onOutgoingCallEnded");
-                    DroidCommon.InCall = false;
+                    DroidCommon.inCall = false;
                 }
                 break;
         }
         lastState = state;
+        Log.d(TAG, "onReceiver - onCallStateChanged");
+        if (DroidCommon.inCall == false) {
+            DroidCommon.EnviaMsg(context);
+        }
     }
 }
