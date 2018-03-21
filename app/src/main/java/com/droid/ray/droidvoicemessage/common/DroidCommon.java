@@ -29,6 +29,8 @@ public class DroidCommon {
     public static final String TAG = "VoiceMessage";
     public static ArrayList<String> Notification = new ArrayList<>();
     public static ArrayList<String> AllNotification = new ArrayList<>();
+    public static Boolean InCall = false;
+    public static Boolean InThread = false;
 
     public static String SetNotification(String notif) {
         String notifLower = notif.toLowerCase();
@@ -138,6 +140,7 @@ public class DroidCommon {
             ch.setText(key.getKey());
             ch.setOnClickListener(getOnClickCheckBox(ch));
             ch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+
             if (key.getValue().equals("S"))
             {
                 ch.setChecked(true);

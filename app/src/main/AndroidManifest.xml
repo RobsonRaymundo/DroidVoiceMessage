@@ -2,9 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.droid.ray.droidvoicemessage">
 
-
     <uses-feature android:name="android.hardware.microphone" />
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
 
     <application
         android:allowBackup="true"
@@ -20,8 +22,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".service.DroidPhoneService"/>
 
+        <service android:name=".service.DroidPhoneService" />
         <service
             android:name=".notification.DroidNotification"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
@@ -29,8 +31,20 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-        <service android:name=".tts.DroidTTS"/>
-    </application>
+        <service android:name=".tts.DroidTTS" />
+        <!-- This part is inside the application -->
 
+        <receiver
+            android:name=".receiver.DroidDetectCall"
+           >
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+            </intent-filter>
+
+        </receiver>
+    </application>
 
 </manifest>

@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+
     android:layout_height="wrap_content"
+
     android:padding="25dp"
     tools:context="com.droid.ray.droidvoicemessage.activity.MainActivity">
 
