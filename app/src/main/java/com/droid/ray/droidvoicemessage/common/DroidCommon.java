@@ -1,8 +1,17 @@
 package com.droid.ray.droidvoicemessage.common;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.os.Build;
 import android.os.Vibrator;
+import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -14,6 +23,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.droid.ray.droidvoicemessage.R;
+import com.droid.ray.droidvoicemessage.activity.MainActivity;
 import com.droid.ray.droidvoicemessage.service.DroidPhoneService;
 import com.droid.ray.droidvoicemessage.tts.DroidTTS;
 
@@ -33,6 +43,8 @@ public class DroidCommon {
     public static Boolean InThread = false;
     public static Boolean LoopingNotification = false;
 
+    public static final int PERMISSION_ALL = 2;
+    public static final String[] PERMISSIONS = {Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.PROCESS_OUTGOING_CALLS};
 
     public static void EnviaMsg(Context context) {
         if (DroidCommon.InThread == false) {
@@ -210,9 +222,10 @@ public class DroidCommon {
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
         tv.setTextColor(context.getResources().getColor(R.color.colorBlack));
         tv.setPadding(0, 100, 0, 60);
-        tv.setText("Selecione abaixo os contatos que serão bloqueados na síntese de voz");
+        tv.setText("Selecione os contatos para usar a síntese de voz");
         ll.addView(tv);
 
+        //for (Map.Entry<String, ?> key : DroidPreferences.GetAllString(context).entrySet()) {
         for (Map.Entry<String, ?> key : DroidPreferences.GetAllString(context).entrySet()) {
             CheckBox ch = new CheckBox(context);
             contextCommon = context;
@@ -246,5 +259,85 @@ public class DroidCommon {
 
             }
         };
+    }
+
+    public static void getAllContact(Context context) {
+
+        try {
+            //This class provides applications access to the content model.
+            ContentResolver cr = context.getContentResolver();
+
+//RowContacts for filter Account Types
+            Cursor contactCursor = cr.query(
+                    ContactsContract.RawContacts.CONTENT_URI,
+                    new String[]{ContactsContract.RawContacts._ID,
+                            ContactsContract.RawContacts.CONTACT_ID},
+                    ContactsContract.RawContacts.ACCOUNT_TYPE + "= ?",
+                    new String[]{"com.whatsapp"},
+                    null);
+
+//ArrayList for Store Whatsapp Contact
+            ArrayList<String> myWhatsappContacts = new ArrayList<>();
+
+            if (contactCursor != null) {
+                if (contactCursor.getCount() > 0) {
+                    if (contactCursor.moveToFirst()) {
+                        do {
+                            //whatsappContactId for get Number,Name,Id ect... from  ContactsContract.CommonDataKinds.Phone
+                            String whatsappContactId = contactCursor.getString(contactCursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID));
+
+                            if (whatsappContactId != null) {
+                                //Get Data from ContactsContract.CommonDataKinds.Phone of Specific CONTACT_ID
+                                Cursor whatsAppContactCursor = cr.query(
+                                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                        new String[]{ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                                                ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME},
+                                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                                        new String[]{whatsappContactId}, null);
+
+                                if (whatsAppContactCursor != null) {
+                                    whatsAppContactCursor.moveToFirst();
+                                    String id = whatsAppContactCursor.getString(whatsAppContactCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+                                    String name = whatsAppContactCursor.getString(whatsAppContactCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                                    String number = whatsAppContactCursor.getString(whatsAppContactCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                                    whatsAppContactCursor.close();
+
+                                    //Add Number to ArrayList
+                                    myWhatsappContacts.add(number);
+
+                                    if (DroidPreferences.GetString(context, name).equals("")) {
+                                        DroidPreferences.SetString(context, name, "N");
+                                    }
+
+                                    Log.d(TAG, "WhatsApp contact name " + name);
+                                    Log.d(TAG, " WhatsApp contact number :  " + number);
+                                }
+                            }
+                        } while (contactCursor.moveToNext());
+                        contactCursor.close();
+                    }
+                }
+            }
+
+            Log.d(TAG, " WhatsApp contact size :  " + myWhatsappContacts.size());
+
+        } catch (Exception ex) {
+            Log.d(TAG, " erro getContact:  " + ex.getMessage());
+        }
+    }
+
+    public static boolean AskPermissionGrand(Activity activity, Context appContext) {
+        boolean retorno = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (String permission : PERMISSIONS) {
+                if (appContext.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity, PERMISSIONS, PERMISSION_ALL);
+                    retorno = false;
+                }
+            }
+        }
+        return retorno;
     }
 }

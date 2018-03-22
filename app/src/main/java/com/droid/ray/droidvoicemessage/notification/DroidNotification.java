@@ -46,7 +46,7 @@ public class DroidNotification extends DroidBaseNotification {
                 pack.contains("com.android.mms") ||
                 pack.contains("com.facebook.orca")) {
             Bundle extras = mStatusBarNotification.getNotification().extras;
-            tit = (String) extras.getCharSequence(Notification.EXTRA_TITLE); // Title
+            tit = (String) extras.getCharSequence(Notification.EXTRA_TITLE).toString().trim().replace(":", ""); // Title
 
             if (DroidCommon.FilterTitleNotification(tit)) {
                 CharSequence desc = extras.getCharSequence(Notification.EXTRA_TEXT); // / Description
@@ -62,15 +62,17 @@ public class DroidNotification extends DroidBaseNotification {
 
                 if (!tit.toLowerCase().equals("whatsapp")) {
                     notif = tit + " " + notif;
-
                     try {
                         String PrefNotif = DroidPreferences.GetString(getBaseContext(), tit);
-
                         if (PrefNotif.equals("")) {
-                            DroidPreferences.SetString(getBaseContext(), tit, "N");
-                        } else if (PrefNotif.equals("S")) {
+                            if ((tit.contains("(") || tit.contains("(")) == false) {
+                                DroidPreferences.SetString(getBaseContext(), tit, "N");
+                            }
+                        }
+                        if (PrefNotif.equals("") || PrefNotif.equals("N")) {
                             notif = "";
                         }
+
                     } catch (Exception ex) {
                         Log.d(TAG, "DroidPreferences: " + ex.getMessage());
                     }

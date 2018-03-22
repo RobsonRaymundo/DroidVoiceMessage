@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.droid.ray.droidvoicemessage.R;
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
@@ -19,8 +20,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "DroidVoiceMessage";
     private Context context;
-    public static final int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 999;
-    private static final int MY_PERMISSIONS_REQUEST_PROCESS_OUTGOING_CALLS = 1;
 
 
     @Override
@@ -29,32 +28,32 @@ public class MainActivity extends AppCompatActivity {
         try {
             context = getBaseContext();
             setContentView(R.layout.activity_main);
-            final ViewGroup layout = (ViewGroup) findViewById(R.id.layout_id);
             DroidCommon.StartPhoneService(context);
-            DroidCommon.ShowLayout(context, layout);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (getApplicationContext().checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    // Permission has not been granted, therefore prompt the user to grant permission
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.READ_PHONE_STATE},
-                            MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
-                }
+            if (DroidCommon.AskPermissionGrand(this, getApplicationContext())) {
+                DroidCommon.getAllContact(context);
+                DroidCommon.ShowLayout(context, (ViewGroup) findViewById(R.id.layout_id));
             }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (getApplicationContext().checkSelfPermission(Manifest.permission.PROCESS_OUTGOING_CALLS)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    // Permission has not been granted, therefore prompt the user to grant permission
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.PROCESS_OUTGOING_CALLS},
-                            MY_PERMISSIONS_REQUEST_PROCESS_OUTGOING_CALLS);
-                }
-            }
-            Log.d(TAG, "onCreate ");
         } catch (Exception ex) {
             Log.d(TAG, "onCreate: " + ex.getMessage());
         }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+
+        switch (requestCode) {
+            case 2: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //Do your work.
+                    DroidCommon.getAllContact(context);
+                    DroidCommon.ShowLayout(context, (ViewGroup) findViewById(R.id.layout_id));
+                }
+                return;
+            }
+        }
+
     }
 }
 
