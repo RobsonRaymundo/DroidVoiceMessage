@@ -34,7 +34,6 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     @Override
     public void onInit(int i) {
         Log.d(TAG, "onInit ");
-        DroidCommon.TimeSleep(1000);
         if (DroidCommon.LoopingNotification == false && tts.isSpeaking() == false) {
             new Thread(new Runnable() {
                 public void run() {
@@ -72,7 +71,7 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
                 DroidCommon.RemoveNotification(str);
                 DroidCommon.TimeSleep(1000);
                 //DroidCommon.InCall();
-                if (DroidCommon.inCall) break;
+                if (DroidCommon.inCall || DroidCommon.forceBreak) break;
             }
             if (DroidCommon.AllNotification.size() > 200) {
                 DroidCommon.AllNotification.clear();

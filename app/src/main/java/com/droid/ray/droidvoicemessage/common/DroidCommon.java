@@ -52,57 +52,43 @@ public class DroidCommon {
 
     public static final int PERMISSION_ALL = 2;
     public static final String[] PERMISSIONS = {Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.PROCESS_OUTGOING_CALLS};
+    public static boolean forceBreak = false;
 
     public static void EnviaMsg(Context context) {
-        if (DroidCommon.InThread == false) {
-            try {
-                Intent intentTTS = new Intent(context, DroidTTS.class);
-                WaitingEndService(intentTTS, context);
-                StopService(intentTTS, context);
-                if (DroidCommon.Notification.size() > 0) {
-                    Log.d(TAG, "EnviaMsg - startService");
-                    context.startService(intentTTS);
-                }
-            } catch (Exception ex) {
-                Log.d(TAG, "Erro EnviaMsg " + ex.getMessage());
+        try {
+            if (DroidCommon.Notification.size() > 0) {
+                Log.d(TAG, "EnviaMsg - startService");
+                StopService();
+                StartService();
             }
+        } catch (Exception ex) {
+            Log.d(TAG, "Erro EnviaMsg " + ex.getMessage());
         }
     }
 
-    public static void WaitingEndService(final Intent intentTTS, final Context context) {
-
-        if (DroidTTS.tts != null) {
-            DroidCommon.TimeSleep(1000);
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        DroidCommon.InThread = true;
-                        while (DroidTTS.tts.isSpeaking()) {
-                            Log.d(TAG, "WaitingEndService");
-                            DroidCommon.TimeSleep(500);
-                        }
-                    } finally {
-                        DroidCommon.InThread = false;
-                    }
-                }
-            }).start();
-        }
-    }
-
-    public static void StopService(final Intent intentTTS, final Context context) {
-
+    private static void StopService() {
         try {
             Log.d(TAG, "StopService");
-            context.stopService(intentTTS);
-            TimeSleep(1000);
+            contextCommon.stopService(new Intent(contextCommon, DroidTTS.class));
+            TimeSleep(500);
         } catch (Exception ex) {
             Log.d(TAG, "stopService: " + ex.getMessage());
         }
     }
 
-    public static void WaitingEndCall(Context context) {
+    public static void StartService() {
+
+        try {
+            Log.d(TAG, "StartService");
+            contextCommon.startService(new Intent(contextCommon, DroidTTS.class));
+            TimeSleep(500);
+        } catch (Exception ex) {
+            Log.d(TAG, "startService: " + ex.getMessage());
+        }
+    }
+
+    public static void WaitingEndCallEndService(final Context context) {
         if (DroidCommon.inCall) {
-            DroidCommon.TimeSleep(1000);
             new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -113,12 +99,29 @@ public class DroidCommon {
                     } catch (Exception ex) {
                         Log.d(TAG, "WaitingEndCall: " + ex.getMessage());
                     }
-                    //EnviaMsg(getBaseContext());
                 }
             }).start();
-        } else EnviaMsg(context);
+        } else if (DroidTTS.tts != null && DroidTTS.tts.isSpeaking()) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        DroidCommon.InThread = true;
+                        if (DroidTTS.tts != null) {
+                            while (DroidTTS.tts.isSpeaking()) {
+                                Log.d(TAG, "WaitingEndService");
+                                DroidCommon.TimeSleep(500);
+                            }
+                        }
+                      //  StopService();
+                    } finally {
+                        DroidCommon.InThread = false;
+                    }
+                }
+            }).start();
+        } else if (DroidCommon.InThread == false) {
+            EnviaMsg(context);
+        }
     }
-
 
     public static String SetNotification(String tit, String notif) {
 

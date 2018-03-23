@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         try {
             context = getBaseContext();
+            DroidCommon.forceBreak = true;
+            DroidCommon.forceBreak = false;
             setContentView(R.layout.activity_main);
             DroidCommon.StartPhoneService(context);
 
