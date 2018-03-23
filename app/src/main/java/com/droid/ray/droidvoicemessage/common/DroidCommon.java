@@ -58,7 +58,7 @@ public class DroidCommon {
             try {
                 Intent intentTTS = new Intent(context, DroidTTS.class);
                 WaitingEndService(intentTTS, context);
-                DroidCommon.TimeSleep(1000);
+                StopService(intentTTS, context);
                 if (DroidCommon.Notification.size() > 0) {
                     Log.d(TAG, "EnviaMsg - startService");
                     context.startService(intentTTS);
@@ -81,17 +81,22 @@ public class DroidCommon {
                             Log.d(TAG, "WaitingEndService");
                             DroidCommon.TimeSleep(500);
                         }
-                        try {
-                            Log.d(TAG, "StopService");
-                            context.stopService(intentTTS);
-                        } catch (Exception ex) {
-                            Log.d(TAG, "stopService: " + ex.getMessage());
-                        }
                     } finally {
                         DroidCommon.InThread = false;
                     }
                 }
             }).start();
+        }
+    }
+
+    public static void StopService(final Intent intentTTS, final Context context) {
+
+        try {
+            Log.d(TAG, "StopService");
+            context.stopService(intentTTS);
+            TimeSleep(1000);
+        } catch (Exception ex) {
+            Log.d(TAG, "stopService: " + ex.getMessage());
         }
     }
 
@@ -231,7 +236,7 @@ public class DroidCommon {
         TextView tv = new TextView(context);
         tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
-         tv.setTextColor(context.getResources().getColor(R.color.colorWhite));
+        tv.setTextColor(context.getResources().getColor(R.color.colorWhite));
         tv.setPadding(0, 100, 0, 60);
         tv.setText("Selecione os contatos para usar a síntese de voz");
         ll.addView(tv);

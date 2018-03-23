@@ -28,10 +28,13 @@ public class DroidNotification extends DroidBaseNotification {
     public void onNotificationPosted(StatusBarNotification sbn) {
         try {
             msg = getNotificationKitKat(sbn);
-            Log.d(TAG, "onNotificationPosted: " + msg);
-            DroidCommon.AddNotification(msg);
-            DroidCommon.AddAllNotification(msg);
-            DroidCommon.WaitingEndCall(getBaseContext());
+            if (!msg.isEmpty()) {
+                cancelAllNotifications();
+                Log.d(TAG, "onNotificationPosted: " + msg);
+                DroidCommon.AddNotification(msg);
+                DroidCommon.AddAllNotification(msg);
+                DroidCommon.WaitingEndCall(getBaseContext());
+            }
         } catch (Exception ex) {
             Log.d(TAG, "onNotificationPosted: " + ex.getMessage());
         }
