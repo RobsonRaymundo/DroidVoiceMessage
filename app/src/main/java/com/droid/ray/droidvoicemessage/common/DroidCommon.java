@@ -7,11 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.CompoundButtonCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -209,7 +212,7 @@ public class DroidCommon {
         TextView tvs = new TextView(context);
         tvs.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tvs.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
-        // tvs.setTextColor(context.getResources().getColor(R.color.colorBlack));
+        tvs.setTextColor(context.getResources().getColor(R.color.colorWhite));
         tvs.setPadding(0, 0, 0, 60);
         tvs.setText("Permita que o Voice Message tenha acesso a notificações");
         ll.addView(tvs);
@@ -228,7 +231,7 @@ public class DroidCommon {
         TextView tv = new TextView(context);
         tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
-        // tv.setTextColor(context.getResources().getColor(R.color.colorBlack));
+         tv.setTextColor(context.getResources().getColor(R.color.colorWhite));
         tv.setPadding(0, 100, 0, 60);
         tv.setText("Selecione os contatos para usar a síntese de voz");
         ll.addView(tv);
@@ -239,7 +242,12 @@ public class DroidCommon {
         while (iterator2.hasNext()) {
             Map.Entry key = (Map.Entry) iterator2.next();
             CheckBox ch = new CheckBox(context);
-            //ch.setTextColor(context.getResources().getColor(R.color.colorBlack));
+            if (Build.VERSION.SDK_INT < 21) {
+                CompoundButtonCompat.setButtonTintList(ch, ColorStateList.valueOf(Color.WHITE));//Use android.support.v4.widget.CompoundButtonCompat when necessary else
+            } else {
+                ch.setButtonTintList(ColorStateList.valueOf(Color.WHITE));//setButtonTintList is accessible directly on API>19
+            }
+            ch.setTextColor(context.getResources().getColor(R.color.colorWhite));
             //ch.setBackgroundColor(context.getResources().getColor(R.color.colorBlack));
             contextCommon = context;
             ch.setText(key.getKey().toString());

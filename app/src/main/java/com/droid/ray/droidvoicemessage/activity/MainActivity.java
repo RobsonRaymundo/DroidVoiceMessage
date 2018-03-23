@@ -4,8 +4,10 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.CompoundButtonCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
             context = getBaseContext();
             setContentView(R.layout.activity_main);
             DroidCommon.StartPhoneService(context);
+
             if (DroidCommon.AskPermissionGrand(this, getApplicationContext())) {
                 DroidCommon.getAllContact(context);
                 DroidCommon.ShowLayout(context, (ViewGroup) findViewById(R.id.layout_id));
