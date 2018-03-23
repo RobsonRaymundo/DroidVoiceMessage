@@ -32,22 +32,9 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "onCreate ");
-        InitializeObjects();
-    }
-
-    @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
-        Log.d(TAG, "onStart ");
-    }
-
-    @Override
     public void onInit(int i) {
         Log.d(TAG, "onInit ");
-
+        DroidCommon.TimeSleep(1000);
         if (DroidCommon.LoopingNotification == false && tts.isSpeaking() == false) {
             new Thread(new Runnable() {
                 public void run() {
@@ -61,6 +48,19 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
         }
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate ");
+        InitializeObjects();
+    }
+
+    @Override
+    public void onStart(Intent intent, int startId) {
+        super.onStart(intent, startId);
+        Log.d(TAG, "onStart ");
+    }
+
     private void LoopingNotification() {
         try {
             DroidCommon.LoopingNotification = true;
@@ -70,6 +70,7 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
             for (String str : mensagens) {
                 Speak(str);
                 DroidCommon.RemoveNotification(str);
+                DroidCommon.TimeSleep(1000);
                 //DroidCommon.InCall();
                 if (DroidCommon.inCall) break;
             }
@@ -107,7 +108,7 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     }
 
     private void ResetObject() {
-        if (tts != null) {
+        if (tts != null && tts.isSpeaking() == false) {
             try {
                 tts.stop();
                 tts.shutdown();

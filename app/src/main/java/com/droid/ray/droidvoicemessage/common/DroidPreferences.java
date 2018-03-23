@@ -3,6 +3,9 @@ package com.droid.ray.droidvoicemessage.common;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -41,9 +44,8 @@ public class DroidPreferences {
 
     }
 
-    public static Map<String, ?> GetAllString(Context context) {
+    public static HashMap<String, String> GetAllString(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_ID, 0);
-        return sharedPreferences.getAll();
-
+        return (HashMap<String, String>) sharedPreferences.getAll();
     }
 }

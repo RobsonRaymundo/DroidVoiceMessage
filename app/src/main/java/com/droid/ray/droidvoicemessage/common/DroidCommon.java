@@ -28,7 +28,11 @@ import com.droid.ray.droidvoicemessage.service.DroidPhoneService;
 import com.droid.ray.droidvoicemessage.tts.DroidTTS;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Created by Robson on 04/08/2017.
@@ -51,6 +55,7 @@ public class DroidCommon {
             try {
                 Intent intentTTS = new Intent(context, DroidTTS.class);
                 WaitingEndService(intentTTS, context);
+                DroidCommon.TimeSleep(1000);
                 if (DroidCommon.Notification.size() > 0) {
                     Log.d(TAG, "EnviaMsg - startService");
                     context.startService(intentTTS);
@@ -64,6 +69,7 @@ public class DroidCommon {
     public static void WaitingEndService(final Intent intentTTS, final Context context) {
 
         if (DroidTTS.tts != null) {
+            DroidCommon.TimeSleep(1000);
             new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -86,26 +92,9 @@ public class DroidCommon {
         }
     }
 
-
-    public static void InCall() {
-        if (DroidCommon.inCall) {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        while (DroidCommon.inCall) {
-                            Log.d(TAG, "WaitingEndCall");
-                            DroidCommon.TimeSleep(2000);
-                        }
-                    } catch (Exception ex) {
-                        Log.d(TAG, "WaitingEndCall: " + ex.getMessage());
-                    }
-                }
-            }).start();
-        }
-    }
-
     public static void WaitingEndCall(Context context) {
         if (DroidCommon.inCall) {
+            DroidCommon.TimeSleep(1000);
             new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -123,7 +112,26 @@ public class DroidCommon {
     }
 
 
-    public static String SetNotification(String notif) {
+    public static String SetNotification(String tit, String notif) {
+
+        if (!tit.toLowerCase().equals("whatsapp")) {
+            notif = tit + " " + notif;
+            try {
+                String PrefNotif = DroidPreferences.GetString(contextCommon, tit);
+                if (PrefNotif.equals("") && notif.trim().isEmpty() == false) {
+                    if ((tit.contains("(") || tit.contains("(")) == false) {
+                        DroidPreferences.SetString(contextCommon, tit, "N");
+                    }
+                }
+                if (PrefNotif.equals("") || PrefNotif.equals("N")) {
+                    notif = "";
+                }
+
+            } catch (Exception ex) {
+                Log.d(TAG, "DroidPreferences: " + ex.getMessage());
+            }
+        } else notif = "";
+
         String notifLower = notif.toLowerCase();
         if (DroidCommon.AllNotification.contains(notif) || notifLower.equals("procurando novas mensagens") || notifLower.equals("mensagens está em execução")) {
             notif = "";
@@ -201,7 +209,7 @@ public class DroidCommon {
         TextView tvs = new TextView(context);
         tvs.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tvs.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
-        tvs.setTextColor(context.getResources().getColor(R.color.colorBlack));
+        // tvs.setTextColor(context.getResources().getColor(R.color.colorBlack));
         tvs.setPadding(0, 0, 0, 60);
         tvs.setText("Permita que o Voice Message tenha acesso a notificações");
         ll.addView(tvs);
@@ -220,16 +228,21 @@ public class DroidCommon {
         TextView tv = new TextView(context);
         tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
-        tv.setTextColor(context.getResources().getColor(R.color.colorBlack));
+        // tv.setTextColor(context.getResources().getColor(R.color.colorBlack));
         tv.setPadding(0, 100, 0, 60);
         tv.setText("Selecione os contatos para usar a síntese de voz");
         ll.addView(tv);
 
-        //for (Map.Entry<String, ?> key : DroidPreferences.GetAllString(context).entrySet()) {
-        for (Map.Entry<String, ?> key : DroidPreferences.GetAllString(context).entrySet()) {
+        Map<String, String> map = new TreeMap<String, String>(DroidPreferences.GetAllString(context));
+        Set set2 = map.entrySet();
+        Iterator iterator2 = set2.iterator();
+        while (iterator2.hasNext()) {
+            Map.Entry key = (Map.Entry) iterator2.next();
             CheckBox ch = new CheckBox(context);
+            //ch.setTextColor(context.getResources().getColor(R.color.colorBlack));
+            //ch.setBackgroundColor(context.getResources().getColor(R.color.colorBlack));
             contextCommon = context;
-            ch.setText(key.getKey());
+            ch.setText(key.getKey().toString());
             ch.setOnClickListener(getOnClickCheckBox(ch));
             ch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 
@@ -241,7 +254,6 @@ public class DroidCommon {
 
         //this.setContentView(sv);  // this causes the fab to fail
         layout.addView(sv);
-
     }
 
 
