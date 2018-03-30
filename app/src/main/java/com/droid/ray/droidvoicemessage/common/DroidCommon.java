@@ -112,7 +112,7 @@ public class DroidCommon {
                                 DroidCommon.TimeSleep(500);
                             }
                         }
-                      //  StopService();
+                        //  StopService();
                     } finally {
                         DroidCommon.InThread = false;
                     }
@@ -124,14 +124,21 @@ public class DroidCommon {
     }
 
     public static String SetNotification(String tit, String notif) {
-
+        String contato = "";
         if (!tit.toLowerCase().equals("whatsapp")) {
-            notif = tit + " " + notif;
+            int indexGroup;
+
             try {
-                String PrefNotif = DroidPreferences.GetString(contextCommon, tit);
+                indexGroup = tit.indexOf("@");
+                if (indexGroup > 0) {
+                    contato = tit.substring(0, indexGroup).trim();
+                } else contato = tit;
+                tit = tit.replace("@", " grupo ");
+                notif = tit + " " + notif;
+                String PrefNotif = DroidPreferences.GetString(contextCommon, contato);
                 if (PrefNotif.equals("") && notif.trim().isEmpty() == false) {
-                    if ((tit.contains("(") || tit.contains("(")) == false) {
-                        DroidPreferences.SetString(contextCommon, tit, "N");
+                    if ((contato.contains("(") || contato.contains("(")) == false) {
+                        DroidPreferences.SetString(contextCommon, contato, "N");
                     }
                 }
                 if (PrefNotif.equals("") || PrefNotif.equals("N")) {
