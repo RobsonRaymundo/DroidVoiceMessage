@@ -241,7 +241,7 @@ public class DroidCommon {
         final LinearLayout ll2 = new LinearLayout(context);
         ll2.setBackgroundColor(context.getResources().getColor(R.color.colorAccent));
         ll2.setOrientation(LinearLayout.VERTICAL);
-        ll2.setPadding(10,10,10,10);
+        ll2.setPadding(5,5,5,5);
 
         Button btn = new Button(context);
         btn.setText("Voice Message");
@@ -251,6 +251,7 @@ public class DroidCommon {
                 ShowListener(contextCommon);
             }
         });
+        btn.setTextColor(context.getResources().getColor(R.color.colorAccent));
         btn.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
         ll2.addView(btn);
 
