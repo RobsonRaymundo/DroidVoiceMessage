@@ -1,6 +1,7 @@
 package com.droid.ray.droidvoicemessage.common;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -10,17 +11,21 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.CompoundButtonCompat;
+import android.text.Layout;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -217,6 +222,7 @@ public class DroidCommon {
 
     }
 
+    @SuppressLint("ResourceAsColor")
     public static void ShowLayout(Context context, ViewGroup layout) {
         contextCommon = context;
         ScrollView sv = new ScrollView(context);
@@ -227,10 +233,15 @@ public class DroidCommon {
         TextView tvs = new TextView(context);
         tvs.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tvs.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
-        tvs.setTextColor(context.getResources().getColor(R.color.colorWhite));
+        tvs.setTextColor(context.getResources().getColor(R.color.colorAccent));
         tvs.setPadding(0, 0, 0, 60);
         tvs.setText("Permita que o Voice Message tenha acesso a notificações");
         ll.addView(tvs);
+
+        final LinearLayout ll2 = new LinearLayout(context);
+        ll2.setBackgroundColor(context.getResources().getColor(R.color.colorAccent));
+        ll2.setOrientation(LinearLayout.VERTICAL);
+        ll2.setPadding(10,10,10,10);
 
         Button btn = new Button(context);
         btn.setText("Voice Message");
@@ -240,13 +251,15 @@ public class DroidCommon {
                 ShowListener(contextCommon);
             }
         });
+        btn.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
+        ll2.addView(btn);
 
-        ll.addView(btn);
+        ll.addView(ll2);
 
         TextView tv = new TextView(context);
         tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
-        tv.setTextColor(context.getResources().getColor(R.color.colorWhite));
+        tv.setTextColor(context.getResources().getColor(R.color.colorAccent));
         tv.setPadding(0, 100, 0, 60);
         tv.setText("Selecione os contatos para usar a síntese de voz");
         ll.addView(tv);
@@ -262,7 +275,7 @@ public class DroidCommon {
             } else {
                 ch.setButtonTintList(ColorStateList.valueOf(Color.WHITE));//setButtonTintList is accessible directly on API>19
             }
-            ch.setTextColor(context.getResources().getColor(R.color.colorWhite));
+            ch.setTextColor(context.getResources().getColor(R.color.colorAccent));
             //ch.setBackgroundColor(context.getResources().getColor(R.color.colorBlack));
             contextCommon = context;
             ch.setText(key.getKey().toString());
