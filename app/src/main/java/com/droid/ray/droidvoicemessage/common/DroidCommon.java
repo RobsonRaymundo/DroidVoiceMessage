@@ -132,8 +132,18 @@ public class DroidCommon {
         String contato = "";
         if (!tit.toLowerCase().equals("whatsapp")) {
             int indexGroup;
-
+            int indexVideo;
             try {
+                indexVideo = notif.indexOf("Vídeo (");
+                if (indexVideo > 0)
+                {
+                    try {
+                        notif = notif.substring(0, indexVideo + 7) + "00:" + notif.substring(indexVideo + 7);
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                }
                 indexGroup = tit.indexOf("@");
                 if (indexGroup > 0) {
                     contato = tit.substring(0, indexGroup).trim();
