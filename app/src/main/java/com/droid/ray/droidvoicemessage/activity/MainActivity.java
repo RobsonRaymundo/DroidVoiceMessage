@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
             DroidCommon.forceBreak = true;
             DroidCommon.forceBreak = false;
             setContentView(R.layout.activity_main);
-            DroidCommon.StartPhoneService(context);
+            //DroidCommon.StartPhoneService(context);
 
             if (DroidCommon.AskPermissionGrand(this, getApplicationContext())) {
                 DroidCommon.getAllContact(context);

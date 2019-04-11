@@ -27,9 +27,7 @@ public class DroidDetectCall extends BroadcastReceiver {
         Log.d(TAG, "onReceiver - Call");
 
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
-        if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {
-            savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
-        } else {
+
             String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
             String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
             int state = 0;
@@ -41,9 +39,8 @@ public class DroidDetectCall extends BroadcastReceiver {
                 state = TelephonyManager.CALL_STATE_RINGING;
             }
 
-
             onCallStateChanged(context, state, number);
-        }
+
     }
 
 
